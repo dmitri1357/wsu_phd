@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+
+import numpy as np
+import xarray as xr
+import os
+
+all_files = os.listdir()
+files = []
+for file in all_files:
+    if file.startswith('z500') and file.endswith('.nc'):
+        files.append(file)
+
+files.sort()
+
+filenames = []
+for file in files:
+    filenames.append(file.rstrip('.nc'))
+
+numdays = [365,365,366,365,365,365,366,365,365,365,366,365,365,365,366,
+           365,365,365,366,365,365,365,366,365,365,365,366,365,365,365,
+           366,365,365,365,366,365,365,365,366,365,365,365,366,365,365,
+           365,366,365,365,365,366,365,365,365,366,365,365,365,366,365,
+           365,365,366,365,365,365,366,365,365,365,366,365]
+idx1 = np.arange(0,8760,24)
+idx2 = np.arange(0,8784,24)
+
+for k in range(len(files)):
+    days = numdays[k]
+    file = files[k]
+    filename = filenames[k]
+    dset = xr.open_dataset(file,decode_times=True)
+    arr = dset.to_array()
+    z500 = np.squeeze(np.squeeze(np.array(arr)))
+    z500_daily = np.empty([days,181,720])
+    for j in range(days):
+        if days == 365:
+            step = idx1[j]
+            chunk = z500[step:step+24,:,:]
+            z500_daily[j,:,:] = np.nanmean(chunk,axis=0)
+        else:
+            step = idx2[j]
+            chunk = z500[step:step+24,:,:]
+            z500_daily[j,:,:] = np.nanmean(chunk,axis=0)
+    z500_daily = z500_daily[:,60:101,80:141]
+    np.save(filename,z500_daily.astype('float32'))
