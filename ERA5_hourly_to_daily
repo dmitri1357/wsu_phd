@@ -4,42 +4,41 @@ import numpy as np
 import xarray as xr
 import os
 
+# this searches current working directory for any files that start with "z500" and end in ".nc"
 all_files = os.listdir()
 files = []
 for file in all_files:
     if file.startswith('z500') and file.endswith('.nc'):
         files.append(file)
 
-files.sort()
+files.sort() # this sorts files by year in ascending order
 
 filenames = []
 for file in files:
     filenames.append(file.rstrip('.nc'))
 
-numdays = [365,365,366,365,365,365,366,365,365,365,366,365,365,365,366,
-           365,365,365,366,365,365,365,366,365,365,365,366,365,365,365,
-           366,365,365,365,366,365,365,365,366,365,365,365,366,365,365,
-           365,366,365,365,365,366,365,365,365,366,365,365,365,366,365,
-           365,365,366,365,365,365,366,365,365,365,366,365]
-idx1 = np.arange(0,8760,24)
-idx2 = np.arange(0,8784,24)
+# the numdays vector has the day count for each year (1979-2021)
+numdays = [365,366,365,365,365,366,365,365,365,366,365,365,365,366,365,365,
+           365,366,365,365,365,366,365,365,365,366,365,365,365,366,365,365,
+           365,366,365,365,365,366,365,365,365,366,365]
+idx1 = np.arange(0,8760,24) # number of hours in 365 day year = 8760
+idx2 = np.arange(0,8784,24) # number of hours in 366 day year = 8784
 
 for k in range(len(files)):
     days = numdays[k]
     file = files[k]
     filename = filenames[k]
-    dset = xr.open_dataset(file,decode_times=True)
+    dset = xr.open_dataset(file,decode_times=True) # using xarray to open each annual file
     arr = dset.to_array()
     z500 = np.squeeze(np.squeeze(np.array(arr)))
-    z500_daily = np.empty([days,181,720])
+    z500_daily = np.empty([days,181,720]) # 181 lats x 720 lons were the dims of my data, change this to your dimensions
     for j in range(days):
-        if days == 365:
+        if days == 365: # code for non-leap years
             step = idx1[j]
-            chunk = z500[step:step+24,:,:]
+            chunk = z500[step:step+24,:,:] # aggregate 24-hour blocks into days
             z500_daily[j,:,:] = np.nanmean(chunk,axis=0)
-        else:
+        else: # code for leap years
             step = idx2[j]
-            chunk = z500[step:step+24,:,:]
+            chunk = z500[step:step+24,:,:] # aggregate 24-hour blocks into days
             z500_daily[j,:,:] = np.nanmean(chunk,axis=0)
-    z500_daily = z500_daily[:,60:101,80:141]
-    np.save(filename,z500_daily.astype('float32'))
+    np.save(filename,z500_daily.astype('float32')) # save each annual file of daily data to Numpy arrays
