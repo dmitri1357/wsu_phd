@@ -18,8 +18,8 @@ slope_perc = stats.percentileofscore(slopes1, slope) # get percentile of real sl
 
 # this is a two-tailed test, so run this code too
 if slope > 0:
-    permuted_pvals = 100 - slope_perc # if real slope is positive, then p-value is the inverse of the percentile
+    permuted_pval = 100 - slope_perc # if real slope is positive, then p-value is the inverse of the percentile
 else:
-    permuted_pvals = slope_perc
-permuted_pvals = permuted_pvals/100 # divide by 100 since percentile was calculated on 0-100 scale, need to transform back to 0-10,000 scale
-print(permuted_pvals)
+    permuted_pval = slope_perc
+permuted_pval = permuted_pval/100 # divide by 100 since percentile was calculated on 0-100 scale, need to transform back to 0-10,000 scale
+print(permuted_pval)
