@@ -10,7 +10,7 @@ slope = stats.linregress(x,y)[0] # indexing into [0] extracts the slope
 
 # determine p-value from nonparametric permutation test with 10,000 iterations
 x = np.arange(1,43,1)
-slopes1 = np.empty(10000) # these are 10,000 randomly generated slopes after data shuffling
+slopes1 = np.empty(10000) # these will be 10,000 randomly generated slopes after data shuffling
 for k in range(10000):
     run = np.random.permutation(some_time_series)
     slopes1[k] = stats.linregress(x,run)[0]
