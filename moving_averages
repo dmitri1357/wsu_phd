@@ -1,1 +1,125 @@
 #!/usr/bin/env python3
+
+import numpy as np
+import pandas as pd
+from mvgavg import mvgavg
+from tqdm import tqdm
+
+# convert z500 to z-scores based on 7-day moving average from 1995-2020
+
+z500_all = np.load('z500_all.npy') # 9497 days (1995-2020)
+
+dates = pd.date_range(start='1/1/1995', end='12/31/2020')
+dates = pd.DataFrame(dates)
+dates['month'] = pd.to_datetime(dates.iloc[:,0]).dt.month
+dates['day'] = pd.to_datetime(dates.iloc[:,0]).dt.day
+dates = dates[~((dates.month == 2) & (dates.day == 29))] # dropping leap dates or the following moving average code will be messed up
+idx = dates.index.values
+
+z500_all = z500_all[idx,:] # removed leap days by indexing all days besides 2/29
+
+# calculate moving averages of Z500 centered on each date between January 4th and December 28th for all years (1995-2020)
+vec = np.reshape(z500_all,(9490,3087)) # now only 9490 days, and 3087 grid cells
+z500_7d = np.empty([9490,3087])
+for k in tqdm(range(3087)): # iterate over all 3087 grid cells
+    cell = list(vec[:,k])
+    averages = list(mvgavg(cell,7)) # calculate 7-day moving averages
+    x1 = cell[:3] # ignoring first 3 days of year
+    x2 = averages
+    x3 = cell[-3:] # ignoring last 3 days of year
+    x2.extend(x3)
+    x1.extend(x2)
+    z500_7d[:,k] = x1
+
+# next, calculate the average of each 7-day window across the 26 years
+daily_avg = np.empty([3087,365])
+for k in tqdm(range(3087)):
+    cell = z500_7d[:,k]
+    years = np.split(cell,26)
+    for i in range(365):
+        x1 = years[0][i]
+        x2 = years[1][i]
+        x3 = years[2][i]
+        x4 = years[3][i]
+        x5 = years[4][i]
+        x6 = years[5][i]
+        x7 = years[6][i]
+        x8 = years[7][i]
+        x9 = years[8][i]
+        x10 = years[9][i]
+        x11 = years[10][i]
+        x12 = years[11][i]
+        x13 = years[12][i]
+        x14 = years[13][i]
+        x15 = years[14][i]
+        x16 = years[15][i]
+        x17 = years[16][i]
+        x18 = years[17][i]
+        x19 = years[18][i]
+        x20 = years[19][i]
+        x21 = years[20][i]
+        x22 = years[21][i]
+        x23 = years[22][i]
+        x24 = years[23][i]
+        x25 = years[24][i]
+        x26 = years[25][i]
+        allvals = [x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20,
+                   x21,x22,x23,x24,x25,x26]
+        daily_avg[k,i] = np.mean(allvals)
+
+# calculate standard deviation for each 7 day window across the 26 years
+daily_std = np.empty([3087,359]) # doing this for only the 359 days while ignoring the first and last 3 days of year
+for k in tqdm(range(3087)):
+    cell = vec[:,k]
+    years = np.split(cell,26)
+    for i in range(359):
+        x1 = years[0][i:i+7]
+        x2 = years[1][i:i+7]
+        x3 = years[2][i:i+7]
+        x4 = years[3][i:i+7]
+        x5 = years[4][i:i+7]
+        x6 = years[5][i:i+7]
+        x7 = years[6][i:i+7]
+        x8 = years[7][i:i+7]
+        x9 = years[8][i:i+7]
+        x10 = years[9][i:i+7]
+        x11 = years[10][i:i+7]
+        x12 = years[11][i:i+7]
+        x13 = years[12][i:i+7]
+        x14 = years[13][i:i+7]
+        x15 = years[14][i:i+7]
+        x16 = years[15][i:i+7]
+        x17 = years[16][i:i+7]
+        x18 = years[17][i:i+7]
+        x19 = years[18][i:i+7]
+        x20 = years[19][i:i+7]
+        x21 = years[20][i:i+7]
+        x22 = years[21][i:i+7]
+        x23 = years[22][i:i+7]
+        x24 = years[23][i:i+7]
+        x25 = years[24][i:i+7]
+        x26 = years[25][i:i+7]
+        allvals = [x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20,
+                   x21,x22,x23,x24,x25,x26]
+        allvals2 = []
+        for j in range(26):
+            allvals2.extend(allvals[j])  
+        daily_std[k,i] = np.std(allvals2)
+
+std_fill1 = np.ones([3087,3]) # filling first 3 days of year with dummy values (1's) at each grid cell
+std_fill2 = np.ones([3087,3]) # filling last 3 days of year with dummy values (1's) at each grid cell
+daily_std = np.hstack([std_fill1,daily_std,std_fill2])
+
+# calculate the standardized anomalies 
+z500_anoms_z = np.empty([3087,9490])
+for k in tqdm(range(3087)):
+    cell = vec[:,k]
+    averages = daily_avg[k,:]
+    stds = daily_std[k,:]
+    all_avg = np.tile(averages,26)
+    all_std = np.tile(stds,26)
+    z500_anoms_z[k,:] = (cell - all_avg)/all_std
+
+z500_anoms_z = z500_anoms_z.astype('float32')
+np.save('z500_anoms_z.npy',z500_anoms_z)
+z500_anoms_z = np.load('z500_anoms_z.npy') # this contains spurious values for first 3 and last 3 days of each year 
