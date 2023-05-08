@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+# helper script to find the Python file(s) which contains <string> 
+# in current working directory
+
+import os
+
+all_files = os.listdir()
+files = []
+for file in all_files:
+    if file.endswith('.py'):
+        files.append(file)
+
+for file in files:
+    with open(file) as f:
+        if '<type the string you're searching here>' in f.read():
+            print(file)
+        else:
+            continue
