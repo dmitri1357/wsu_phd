@@ -37,6 +37,6 @@ for k in range(len(files)):
         
 precip = np.where(precip==-9999,np.nan,precip) # since NA's are filled with -9999, change to NA (using np.nan call)
 
-precip = precip.astype('float32') # store as float32 instead of float 64 - half the size
+precip = precip.astype('float32') # store as float32 instead of float64 - half the size
 
 np.save('precip',precip)
