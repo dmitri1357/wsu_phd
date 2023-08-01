@@ -21,6 +21,7 @@ max_lat = 10
 
 last_index = len(files) - 1
 
+# loop through the 43 annual CHIRPS files and concatenate them into single array
 precip = np.empty([0,500,500])
 for k in range(len(files)):
     ds = xr.open_dataset(file)
