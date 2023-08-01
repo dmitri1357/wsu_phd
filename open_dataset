@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+
+import xarray as xr
+ds = xr.open_dataset('chirps-v2.0.2021.days_p05.nc')
+
+min_lon = 25
+min_lat = -15
+max_lon = 50 
+max_lat = 10 
+
+cropped_ds = ds.sel(latitude=slice(min_lat,max_lat), longitude=slice(min_lon,max_lon))
