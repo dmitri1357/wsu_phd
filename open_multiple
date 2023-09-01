@@ -24,7 +24,7 @@ last_index = len(files) - 1
 # loop through the 43 annual CHIRPS files and concatenate them into single array
 precip = np.empty([0,500,500])
 for k in range(len(files)):
-    ds = xr.open_dataset(file)
+    ds = xr.open_dataset(files[k])
     cropped_ds = ds.sel(latitude=slice(min_lat,max_lat), longitude=slice(min_lon,max_lon))
     prec_array = np.squeeze(cropped_ds.to_array())
     if k < last_index:
