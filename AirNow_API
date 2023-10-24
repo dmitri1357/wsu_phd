@@ -6,7 +6,7 @@ import urllib
 import numpy as np
 
 days = np.arange(1,32,1)
-month = 12
+month = 7
 
 for k in range(31):
     day = days[k]
@@ -20,7 +20,7 @@ for k in range(31):
     options["end_date"] = "2019-{}-{}".format(month,day)
     options["end_hour_utc"] = "23"
     options["parameters"] = "o3,pm25"
-    options["bbox"] = "-79.999,24,-67,49"
+    options["bbox"] = "-125,30,-100,49"
     options["data_type"] = "c"
     options["format"] = "text/csv"
     options["ext"] = "csv"
