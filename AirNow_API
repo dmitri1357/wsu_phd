@@ -15,9 +15,9 @@ for k in range(31):
     # API parameters
     options = {}
     options["url"] = "https://airnowapi.org/aq/data/"
-    options["start_date"] = "2019-{}-{}".format(month,day)
+    options["start_date"] = f"2019-{month}-{day}"
     options["start_hour_utc"] = "00"
-    options["end_date"] = "2019-{}-{}".format(month,day)
+    options["end_date"] = f"2019-{month}-{day}"
     options["end_hour_utc"] = "23"
     options["parameters"] = "o3,pm25"
     options["bbox"] = "-125,30,-100,49"
