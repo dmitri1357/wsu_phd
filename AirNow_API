@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+
+import os
+from os.path import expanduser
+import urllib
+import numpy as np
+
+days = np.arange(1,32,1)
+month = 12
+
+for k in range(31):
+    day = days[k]
+    day = str(day).zfill(2)
+    month = str(month).zfill(2)
+    # API parameters
+    options = {}
+    options["url"] = "https://airnowapi.org/aq/data/"
+    options["start_date"] = "2019-{}-{}".format(month,day)
+    options["start_hour_utc"] = "00"
+    options["end_date"] = "2019-{}-{}".format(month,day)
+    options["end_hour_utc"] = "23"
+    options["parameters"] = "o3,pm25"
+    options["bbox"] = "-79.999,24,-67,49"
+    options["data_type"] = "c"
+    options["format"] = "text/csv"
+    options["ext"] = "csv"
+    options["api_key"] = "891A9C29-F457-4DFD-96DB-195F2D49BFA9"
+    
+    # API request URL
+    REQUEST_URL = options["url"] \
+                  + "?startdate=" + options["start_date"] \
+                  + "t" + options["start_hour_utc"] \
+                  + "&enddate=" + options["end_date"] \
+                  + "t" + options["end_hour_utc"] \
+                  + "&parameters=" + options["parameters"] \
+                  + "&bbox=" + options["bbox"] \
+                  + "&datatype=" + options["data_type"] \
+                  + "&format=" + options["format"] \
+                  + "&api_key=" + options["api_key"]
+    
+    # User's home directory.
+    home_dir = expanduser("~")
+    download_file_name = "AirNowAPI" + "{}{}.".format(month,day) + options["ext"]
+    download_file = os.path.join(home_dir, download_file_name)
+    
+    # Perform the AirNow API data request
+    api_data = urllib.URLopener()
+    api_data.retrieve(REQUEST_URL, download_file)
