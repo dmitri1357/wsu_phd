@@ -40,7 +40,7 @@ for k in range(31):
     
     # User's home directory.
     home_dir = expanduser("~")
-    download_file_name = "AirNowAPI" + "{}{}.".format(month,day) + options["ext"]
+    download_file_name = "AirNowAPI" + f"{month}{day}." + options["ext"]
     download_file = os.path.join(home_dir, download_file_name)
     
     # Perform the AirNow API data request
