@@ -2,6 +2,7 @@
 
 ## calculate latitude weights
 
+# this example is over the Mexico-Texas domain
 lats = np.arange(14.75,36.76,0.25)
 lons = np.arange(-118.5,-86.74,0.25)
 lats = np.append(lats,37)
@@ -24,19 +25,8 @@ for i in range(89): # 89 latitude bands at 0.25 deg resolution
 
 area_vec = np.reshape(areas,11392)
 
-np.save('actual_areas',area_vec)
-actual_areas = np.load('actual_areas.npy')
-
-tvec = np.reshape(tmax_amjjas2_z,(15372,11392))
-
-# find area of all grid cells in domain
-maxs = np.nanmax(tvec,axis=0)
-np.nanmax(maxs)
-np.nanmin(maxs)
-cell_idx = np.where(maxs>0)[0]
-cell_areas = actual_areas[cell_idx]
-np.sum(cell_areas) # 2,618,551 sq. km.
-
 # find the middle value, and normalize the domain by this value
 norm_middle = ((np.max(area_vec) - np.min(area_vec)) / 2) + np.min(area_vec)
 area_vec = area_vec/norm_middle # ~682.8 sqkm is middle area
+
+### the "area_vec" variable is then multiplied by your climate variable (e.g., Tmax) - the result is area-weighted Tmax
