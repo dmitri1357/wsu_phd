@@ -24,6 +24,7 @@ for i in range(89): # 89 latitude bands at 0.25 deg resolution
         deg1 = cosrad * 111.32 # 111.32 km is the width of one degree of longitude at equator
         # need to multiply cosrad by deg1 to get the actual width of one degree of longitude at current latitude
         lon_dist = deg1 * lon_diff # actual width of longitude at current resolution (0.25 degrees) 
+        # if your resolution is 1 degree, you can skip line 26 
         areas[i,j] = lat_dist * lon_dist
 
 area_vec = np.reshape(areas,11392)
