@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import numpy as np
+
 ## calculate latitude weights
 
 # this example is over the Mexico-Texas domain
@@ -18,15 +20,16 @@ for i in range(89): # 89 latitude bands at 0.25 deg resolution
     for j in range(128): # 128 longitude bands
         lon1 = lons[j] # left edge
         lon2 = lons[j+1] # right edge
-        cosrad = np.cos(np.deg2rad(lat1)) 
-        deg1 = cosrad * 111.32 # 111.32 km for one degree of longitude at equator
-        lon_dist = deg1 * lon_diff
+        cosrad = np.cos(np.deg2rad(lat1)) # fraction of longitude width at this latitude, relative to width at equator
+        deg1 = cosrad * 111.32 # 111.32 km is the width of one degree of longitude at equator
+        # need to multiply cosrad by deg1 to get the actual width of one degree of longitude at current latitude
+        lon_dist = deg1 * lon_diff # actual width of longitude at current resolution (0.25 degrees) 
         areas[i,j] = lat_dist * lon_dist
 
 area_vec = np.reshape(areas,11392)
 
 # find the middle value, and normalize the domain by this value
 norm_middle = ((np.max(area_vec) - np.min(area_vec)) / 2) + np.min(area_vec)
-area_vec = area_vec/norm_middle # ~682.8 sqkm is middle area
+area_vec = area_vec/norm_middle # ~682.8 sqkm is middle value (note = this is not the same as simply taking the average of the grid cell areas, although it's close)
 
 ### the "area_vec" variable is then multiplied by your climate variable (e.g., Tmax) - the result is area-weighted Tmax
