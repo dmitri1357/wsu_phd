@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+
+## calculate latitude weights
+
+lats = np.arange(14.75,36.76,0.25)
+lons = np.arange(-118.5,-86.74,0.25)
+lats = np.append(lats,37)
+lons = np.append(lons,-86.5)
+
+lat_diff = 0.25
+lat_dist = np.abs(lat_diff * 111) # km for one degree of latitude in the mid-latitudes
+lon_diff = 0.25
+
+areas = np.empty([89,128])
+for i in range(89): # 89 latitude bands at 0.25 deg resolution
+    lat1 = lats[i] # grab current latitude
+    for j in range(128): # 128 longitude bands
+        lon1 = lons[j] # left edge
+        lon2 = lons[j+1] # right edge
+        cosrad = np.cos(np.deg2rad(lat1)) 
+        deg1 = cosrad * 111.32 # 111.32 km for one degree of longitude at equator
+        lon_dist = deg1 * lon_diff
+        areas[i,j] = lat_dist * lon_dist
+
+area_vec = np.reshape(areas,11392)
+
+np.save('actual_areas',area_vec)
+actual_areas = np.load('actual_areas.npy')
+
+tvec = np.reshape(tmax_amjjas2_z,(15372,11392))
+
+# find area of all grid cells in domain
+maxs = np.nanmax(tvec,axis=0)
+np.nanmax(maxs)
+np.nanmin(maxs)
+cell_idx = np.where(maxs>0)[0]
+cell_areas = actual_areas[cell_idx]
+np.sum(cell_areas) # 2,618,551 sq. km.
+
+# find the middle value, and normalize the domain by this value
+norm_middle = ((np.max(area_vec) - np.min(area_vec)) / 2) + np.min(area_vec)
+area_vec = area_vec/norm_middle # ~682.8 sqkm is middle area
