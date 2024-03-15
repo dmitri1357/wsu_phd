@@ -9,7 +9,7 @@ lats = np.append(lats,37)
 lons = np.append(lons,-86.5)
 
 lat_diff = 0.25
-lat_dist = np.abs(lat_diff * 111) # km for one degree of latitude in the mid-latitudes
+lat_dist = np.abs(lat_diff * 111) # 111 km for one degree of latitude (approximate)
 lon_diff = 0.25
 
 areas = np.empty([89,128])
