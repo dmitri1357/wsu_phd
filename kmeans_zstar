@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+
+import pandas as pd
+import numpy as np
+import xarray as xr
+import matplotlib.pyplot as plt   
+from mpl_toolkits.basemap import Basemap
+from sklearn.cluster import KMeans
+
+# set figure font to Arial
+import matplotlib as mpl
+mpl.rc('font',family='Arial')
+
+zstar = xr.open_dataset('TC_peak_20N_75N_110E_100W.nc')
+
+# extract Numpy array (186 days x 221 lats x 601 lons)
+zstar = zstar.Z_STAR.values
+
+# vectorize lat-lon
+zstar = np.reshape(zstar,(186,221*601))
+
+# k-means clustering of Z*
+
+num_clust = 4
+
+kmeans = KMeans(n_clusters=num_clust, 
+                n_init=100, 
+                max_iter=500, 
+                random_state=31)
+kmeans.fit(zstar) # run kmeans algorithm over zstar
+
+# extract cluster assignments
+labels = kmeans.labels_
+
+# extract corresponding day indexes for each cluster
+ks = [np.where(labels == k)[0] for k in range(num_clust)]
+
+# compute the number of days assigned to each cluster, and the corresponding percentage of days 
+sizes = []
+percs = []
+for k in range(num_clust):
+    x = ks[k]
+    percs.append((np.size(x)/X.shape[0]*100))
+    sizes.append(np.size(x))
+
+# define functions to compute 2D pattern correlations
+def mean2(x):
+    y = np.sum(x) / np.size(x)
+    return y
+
+def corr2(a,b): # define function to compute 2D pattern correlation
+    a = a - mean2(a)
+    b = b - mean2(b)
+
+    r = (a*b).sum() / np.sqrt((a*a).sum() * (b*b).sum())
+    return r
+  
+# extract median pattern correlations
+median_corrs = []
+for j in range(num_clust):
+    this_clust = ks[j]
+    cluster_patterns = zstar[this_clust,:]
+    cluster_mean = np.mean(cluster_patterns,axis=0)
+    corrs = np.empty(len(this_clust))
+    for k in range(len(this_clust)):
+        day = cluster_patterns[k,:]
+        corrs[k] = corr2(cluster_mean,day)
+    corrs = pd.DataFrame({'corr':corrs})
+    median_corrs.append(np.median(corrs))
+
+lat = np.arange(20,75.1,0.25)
+lon = np.arange(110,260.1,0.25)
+lon, lat = np.meshgrid(lon, lat)
+
+fig = plt.figure(figsize=(14,6))
+for i in range(num_clust):
+    fig.add_subplot(1,num_clust,i+1)
+    
+    cluster_patterns = zstar[ks[i],:]
+    cluster_mean = np.mean(cluster_patterns,axis=0)
+    
+    var = np.reshape(cluster_mean,(221,601)) # reshape cluster composite back to lat x lon
+    
+    m = Basemap(projection='lcc', area_thresh=10000, resolution='l',
+                width=10E6, height=8E6,
+                lat_0=47.5, lon_0=-175)
+    m.fillcontinents(color='gray',lake_color='white',alpha=1,zorder=0)
+    m.drawstates(linewidth=0.5,linestyle='solid',color='k')
+    m.drawcountries(linewidth=0.5,linestyle='solid',color='k')
+    m.drawcoastlines(color='black',linewidth=0.5)
+    m.pcolormesh(lon, lat, var, latlon=True, 
+                 cmap=plt.cm.get_cmap('RdBu_r',24))
+    #plt.colorbar()
+    plt.clim(-120,120)
+    plt.text(1E5,1E5,'{} = {}'.format('$\it{r}$',np.round(median_corrs[clusts[i]],2)), size=15)
+    x, y = m(lon, lat)
+    clevs1 = np.arange(-120,120,20)
+    csl = m.contour(x, y, var, clevs1, colors = 'k', linewidths=0.8)
+    plt.title(f'Cluster {i+1}', size=15)
+    #plt.clabel(csl, fmt = '%.1d {}'.format(''), inline = True, fontsize = 8)
+fig.subplots_adjust(hspace = 0.3)
