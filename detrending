@@ -9,7 +9,7 @@ import numpy as np
 x = np.arange(len(z500))
 
 # fit linear trend
-# you won't need the intercept here, just the slop
+# you won't need the intercept here, just the slope
 slope, intercept, _, _, _ = linregress(x, z500)
 
 # Compute trendline starting in 1980
