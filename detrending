@@ -6,7 +6,7 @@ from scipy.stats import linregress
 import numpy as np
 
 # create time vector (of length 45)
-x = np.arange(len(hw_days_per_year))
+x = np.arange(len(z500))
 
 # fit linear trend
 # you won't need the intercept here, just the slop
