@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+# let's say you have a variable called z500 that has 45 years of data from 1980-2024 (45 annual values)
+
+from scipy.stats import linregress
+import numpy as np
+
+# create time vector (of length 45)
+x = np.arange(len(hw_days_per_year))
+
+# fit linear trend
+# you won't need the intercept here, just the slop
+slope, intercept, _, _, _ = linregress(x, z500)
+
+# Compute trendline starting in 1980
+trendline = slope * x # this increments the trendline every year
+
+# Subtract trendline from the z500 timeseries - this is the "detrending"
+z500_detrended = z500 - trendline
